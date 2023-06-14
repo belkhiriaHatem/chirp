@@ -59,8 +59,8 @@ const PostView = (props: PostWithUser) => {
         {props.author?.profileImageUrl && (<Image src={props.author?.profileImageUrl} alt="Author Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>)}
         <div className="flex flex-col">
           <div>
-            <span className="font-thin text-slate-400 cursor-pointer">{`@${String(props.author?.username)}`}</span>
-            <span className="text-slate-200 text-sm">{` · ${String(dayjs(props.post.createdAt).fromNow())}`}</span>
+            <Link href={`/@${props.author?.username}`}><span className="font-thin text-slate-400 cursor-pointer">{`@${String(props.author?.username)}`}</span></Link>
+            <Link href={`/post/${props.post.id}`}><span className="text-slate-200 text-sm">{` · ${String(dayjs(props.post.createdAt).fromNow())}`}</span></Link>
           </div>
           <span>{props.post.content}</span>
         </div>
