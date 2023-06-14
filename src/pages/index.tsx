@@ -5,6 +5,7 @@ import { RouterOutputs, api } from "~/utils/api";
 import { SignIn, SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
@@ -40,12 +41,25 @@ const PostView = (props: PostWithUser) => {
   )
 }
 
+const Feed = () => {
+  const { data, isFetching: postsLoading } = api.post.getAll.useQuery();
+
+  if (postsLoading) return <LoadingPage />; 
+
+  return (
+    <div>
+      {data?.map(({post, author}) => (
+        <PostView  author={author} post={post} key={post.id}/>
+      ))}
+    </div>
+  )
+}
+
 const Home: NextPage = () => {
 
-  const user = useUser();
-
-  const { data, isFetching } = api.post.getAll.useQuery();
-  if (isFetching) return <span>LOADING!!</span>
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  
+  if (!userLoaded) return <div />
 
   return (
     <>
@@ -56,16 +70,12 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex justify-center h-screen">
         <div className="w-full md:max-w-2xl border-x border-slate-400">
-        <div className="flex border-b p-4">
-          {!user.isSignedIn && <SignInButton />}
-          {/* {user.isSignedIn && <><SignOutButton/><CreatePostWizard/></>} */}
-          {user.isSignedIn && <CreatePostWizard/>}
-        </div>
-        <div>
-          {data?.map(({post, author}) => (
-            <PostView  author={author} post={post} key={post.id}/>
-          ))}
-        </div>
+          <div className="flex border-b p-4">
+            {!isSignedIn && <SignInButton />}
+            {/* {user.isSignedIn && <><SignOutButton/><CreatePostWizard/></>} */}
+            {isSignedIn && <CreatePostWizard/>}
+          </div>
+          <Feed />
         </div>
       </main>
     </>
