@@ -6,18 +6,30 @@ import { SignIn, SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
 const CreatePostWizard = () => {
   const user = useUser();
+  const [input, setInput] = useState("");
+  
+  const ctx = api.useContext();
+  
+  const { mutate, isLoading: isPosting } = api.post.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.post.getAll.invalidate();
+    } 
+  });
   
   if (!user) return null;
   return (
     <div className="flex gap-4 w-full">
-      <Image src={user.user?.profileImageUrl} alt="Profile Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>
-      <input placeholder="Type some emojis..." className="bg-transparent grow outline-none"/>
+      {user.user?.profileImageUrl && (<Image src={user.user?.profileImageUrl} alt="Profile Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>)}
+      <input disabled={isPosting} placeholder="Type some emojis..." className="bg-transparent grow outline-none" value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   )
 }
@@ -28,7 +40,7 @@ const PostView = (props: PostWithUser) => {
   return (
     <div key={props.post.id} className="flex border-b p-4">
       <div className="flex gap-4 w-full items-center">
-        <Image src={props.author?.profileImageUrl} alt="Author Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>
+        {props.author?.profileImageUrl && (<Image src={props.author?.profileImageUrl} alt="Author Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>)}
         <div className="flex flex-col">
           <div>
             <span className="font-thin text-slate-400 cursor-pointer">{`@${props.author?.username}`}</span>
