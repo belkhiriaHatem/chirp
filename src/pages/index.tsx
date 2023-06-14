@@ -7,9 +7,9 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
 import { useState } from "react";
+import relativeTime from 'dayjs/plugin/relativeTime';
 
-var relativeTime = require('dayjs/plugin/relativeTime')
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const user = useUser();
