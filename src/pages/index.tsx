@@ -5,9 +5,10 @@ import { RouterOutputs, api } from "~/utils/api";
 import { SignIn, SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import Image from "next/image";
-import { LoadingPage } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { toast } from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -21,15 +22,30 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.post.getAll.invalidate();
-    } 
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors?.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
+    }
   });
   
   if (!user) return null;
   return (
     <div className="flex gap-4 w-full">
       {user.user?.profileImageUrl && (<Image src={user.user?.profileImageUrl} alt="Profile Pic" className="w-14 h-14 rounded-full" width={56} height={56}/>)}
-      <input disabled={isPosting} placeholder="Type some emojis..." className="bg-transparent grow outline-none" value={input} onChange={(e) => setInput(e.target.value)} />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      <input disabled={isPosting} placeholder="Type some emojis..." className="bg-transparent grow outline-none" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (input !== "") {
+            mutate({ content: input })
+          }
+        }
+      }} />
+      {input !== "" && (<button disabled={isPosting} onClick={() => mutate({ content: input })}>{isPosting ? <LoadingSpinner /> :"Post"}</button>)}
     </div>
   )
 }
@@ -44,7 +60,7 @@ const PostView = (props: PostWithUser) => {
         <div className="flex flex-col">
           <div>
             <span className="font-thin text-slate-400 cursor-pointer">{`@${String(props.author?.username)}`}</span>
-            <span className="text-slate-100">{` · ${String(dayjs(props.post.createdAt).fromNow())}`}</span>
+            <span className="text-slate-200 text-sm">{` · ${String(dayjs(props.post.createdAt).fromNow())}`}</span>
           </div>
           <span>{props.post.content}</span>
         </div>
