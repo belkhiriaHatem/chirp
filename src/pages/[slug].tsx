@@ -10,6 +10,8 @@ import superjson from 'superjson';
 import { prisma } from "~/server/db";
 import { PageLayout } from "~/components/layout";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
+import { PostView } from "~/components/postView";
 
 
 export const getStaticProps: GetStaticProps = async (context) => {
@@ -39,6 +41,21 @@ export const getStaticPaths = () => {
   }
 }
 
+const ProfileFeed = (props: {userId: string}) => {
+  const { data, isFetching } = api.post.getPostsByUserId.useQuery({ userId: props.userId });
+
+  if (isFetching) return <LoadingPage />
+  if (!data) return <div>User have no Posts yet!</div>
+  
+  return (
+    <div className="flex flex-col">
+      {data.map((post, i) => (
+        <PostView post={post.post} author={post.author} key={i}/>
+      ))}
+    </div>
+  )
+}
+
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   const { data } = api.profile.getUserByUsername.useQuery({ username });
 
@@ -64,6 +81,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
           @{data.username}
         </div>
         <div className="w-full border-b border-slate-400"></div>
+        {data.id && (<ProfileFeed userId={data.id} />)}
       </PageLayout>
     </>
   );
