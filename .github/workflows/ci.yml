@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DATABASE_URL: "https://fake.com"
+  DATABASE_URL: "mysql://aecrvqw74xbguv4ccvsq:pscale_pw_BK2OJLvQFo6bby7UILc4EtfG1SdS1V6LUmh4ySekJ55@aws.connect.psdb.cloud/chirp-db?sslaccept=strict"
 
 jobs:
   build:
