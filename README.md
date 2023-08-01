@@ -1,4 +1,4 @@
-# This is a [T3 Stack] project.
+# This is a "only emojis are allowed" social app.
 
 - [Next.js](https://nextjs.org)
 - [clerk](https://clerk.com)
